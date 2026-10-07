@@ -1,0 +1,3 @@
+dataset,frame,total_lidar_points,image_resolution,points_inside_image,fov_coverage_ratio,ego_motion_drift_px,sensor_sync_method
+KITTI (64-beam HDL-64E),000011,108004,1242x375,19946,0.18467834524647236,0.0,Pre-rectified / Hardware trigger
+nuScenes (32-beam),scene-0103_010,34720,1600x900,3120,0.08986175115207373,13.73045942521358,Asynchronous timestamps (Ego-motion deskew)

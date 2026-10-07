@@ -1,0 +1,6 @@
+frame_id,timestamp_s,delta_t_s,total_points,nan_inf_points,defects_detected
+000000,0.0,0.1,23953,23,Chứa 23 điểm NaN/Inf (0.10%)
+000001,0.1,0.1,23781,23,Chứa 23 điểm NaN/Inf (0.10%)
+000002,0.2,0.1,23790,23,Chứa 23 điểm NaN/Inf (0.10%)
+000003,0.4,0.2,22063,22,Chứa 22 điểm NaN/Inf (0.10%); Mất đồng bộ thời gian / Drop frame (dt = 0.20s thay vì 0.10s); Suy giảm mật độ chùm quét đột ngột (22063 điểm so với ~23800 điểm)
+000004,0.5,0.09999999999999998,23760,23,Chứa 23 điểm NaN/Inf (0.10%)
