@@ -32,7 +32,12 @@ def velo_to_cam(points_xyz: np.ndarray, calib: KittiCalib) -> np.ndarray:
       3. Trả về 3 cột đầu.
     Tự kiểm: một điểm velodyne (10, 0, 0) phải có z_cam ~ 10 (phía trước camera).
     """
-    raise NotImplementedError("TODO(CP2): cài đặt velo_to_cam")
+    if points_xyz.shape[0] == 0:
+        return np.empty((0, 3), dtype=points_xyz.dtype)
+    ones = np.ones((points_xyz.shape[0], 1), dtype=points_xyz.dtype)
+    pts_homo = np.hstack([points_xyz, ones])
+    pts_cam_homo = pts_homo @ calib.T_cam_velo.T
+    return pts_cam_homo[:, :3]
 
 
 def cam_to_image(points_cam: np.ndarray, P2: np.ndarray, image_shape: tuple[int, ...],
@@ -52,7 +57,36 @@ def cam_to_image(points_cam: np.ndarray, P2: np.ndarray, image_shape: tuple[int,
       3. Chia cho s để có (u, v). Chỉ chia với điểm có depth > min_depth.
       4. Lọc theo kích thước ảnh image_shape[:2] = (H, W).
     """
-    raise NotImplementedError("TODO(CP2): cài đặt cam_to_image")
+    n_points = len(points_cam)
+    if n_points == 0:
+        return np.empty((0, 2)), np.empty((0,)), np.zeros(0, dtype=bool)
+
+    # 1. Lọc điểm không hợp lệ (NaN / Inf)
+    finite_mask = np.isfinite(points_cam).all(axis=1)
+
+    # 2. Toạ độ đồng nhất, nhân P2 -> (N, 3) = [s*u, s*v, s]
+    ones = np.ones((n_points, 1), dtype=points_cam.dtype)
+    pts_cam_homo = np.hstack([points_cam, ones])
+    proj = pts_cam_homo @ P2.T
+
+    depth = proj[:, 2]
+    depth_mask = finite_mask & (depth > min_depth)
+
+    # 3. Chia cho s để có (u, v) với điểm depth > min_depth
+    u = np.full(n_points, np.nan)
+    v = np.full(n_points, np.nan)
+    u[depth_mask] = proj[depth_mask, 0] / depth[depth_mask]
+    v[depth_mask] = proj[depth_mask, 1] / depth[depth_mask]
+
+    # 4. Lọc theo kích thước ảnh
+    h, w = image_shape[:2]
+    in_bounds = depth_mask & (u >= 0) & (u < w) & (v >= 0) & (v < h)
+
+    uv = np.stack([u[in_bounds], v[in_bounds]], axis=1)
+    valid_depth = depth[in_bounds]
+    mask = in_bounds
+
+    return uv, valid_depth, mask
 
 
 def project_velo_to_image(points: np.ndarray, calib: KittiCalib, image_shape: tuple[int, ...]):
